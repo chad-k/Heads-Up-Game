@@ -53,11 +53,19 @@ Desktop: **Space / right arrow** = correct, **left arrow** = skip, **P** = pause
 
 Full-screen and screen wake-lock are best effort. A browser may refuse either; play remains available. Landscape is recommended but portrait works. Motion calibration uses screen inclination relative to gravity so it does not depend on a specific portrait/landscape Euler-angle axis.
 
+## Tilt improvements in v1.1
+
+- Tracking continues during answer feedback, fixing missed upright resets.
+- Choose Gentle for missed gestures, Balanced by default, or Deliberate for accidental triggers. Changing sensitivity requires repeating calibration practice.
+- A live angle/trigger readout helps with the practice steps.
+- The end of each start/resume countdown recalibrates the neutral position at your forehead. Hold the phone upright and still for the last second. If that calibration fails, play does not begin and you can retry or use buttons.
+- Rate-independent filtering is tested at 10, 20, 60 and 120 Hz. These simulations do not replace a physical-phone test.
+
 ## Motion implementation and limits
 
 The app listens to `devicemotion` and uses `accelerationIncludingGravity`. It checks for a secure context, requests `DeviceMotionEvent.requestPermission()` from an explicit button press where that API exists, and waits for actual sensor data. A device can expose the API but supply no usable samples; the UI reports that and offers buttons.
 
-Calibration requires at least twelve recent, relatively stable samples, with the screen near upright. Gravity magnitude checks reject missing/implausible samples. A low-pass filter suppresses jitter. A deliberate tilt must exceed 35 degrees relative to calibration for at least 160 ms. Returning within 12 degrees of neutral for at least 250 ms re-arms input, with an 800 ms minimum between detections. The training step learns which sign is the player's down gesture. These are heuristics, not a guarantee against all false detections.
+Calibration requires at least six recent, relatively stable samples, with the screen near upright. Gravity magnitude checks reject missing/implausible samples. A time-based low-pass filter suppresses jitter consistently across sensor event rates. Balanced requires a 28-degree tilt sustained for 110 ms; Gentle uses 22 degrees / 90 ms; Deliberate uses 38 degrees / 140 ms. Neutral ranges are 16, 14 and 18 degrees respectively. Holding neutral for 140 ms re-arms input after a 500, 400 or 650 ms minimum cooldown. Input remains tracked during answer feedback so returning upright is not missed, but gestures during feedback cannot score or queue a score. The training step learns which sign is the player's down gesture. These are heuristics, not a guarantee against all false detections.
 
 The timer uses a monotonic clock. Pausing freezes time and blocks input. Hiding the page automatically pauses an active round; a hidden countdown stops. Motion data stopping during play pauses the round; Resume switches to buttons if motion is still unavailable. A short feedback lock prevents rapid button clicks from double-counting.
 
@@ -83,7 +91,7 @@ Visit `http://localhost:3000`. Motion on a separate phone using a plain HTTP LAN
 npm test
 ```
 
-**14 automated tests** cover single-word validity and exact bank counts, category/difficulty coverage, filtering, repeat handling, import validation, scoring, timeout, pause/resume, review corrections, gravity math, calibration, tilt thresholds, re-arming, jitter rejection, HTTP routes, required client IDs and security headers. Client JavaScript was syntax-checked and the build passed.
+**18 automated tests** cover single-word validity and exact bank counts, category/difficulty coverage, filtering, repeat handling, import validation, scoring, timeout, pause/resume, review corrections, gravity math, calibration, tilt thresholds, re-arming, jitter rejection, HTTP routes, required client IDs and security headers. Client JavaScript was syntax-checked and the build passed.
 
 A physical phone and visual browser playtest were not available during development. Before a group session, test permission acceptance/denial, both tilt directions, repeat prevention, landscape display, pause/resume and button fallback on your intended phones. Sensor behavior can vary across browsers and hardware.
 
