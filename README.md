@@ -1,4 +1,5 @@
 # Word Up — a single-word forehead guessing game
+# Check out my app at - https://heads-up-game.onrender.com
 
 A standalone, mobile-friendly party game. One player holds the phone against their forehead, screen facing friends; friends give clues, and the player guesses. **One phone serves the entire group.** This is a local pass-and-play game, not an online room service. It is not affiliated with Heads Up.
 
